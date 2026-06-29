@@ -114,8 +114,9 @@
     position: absolute; left: 0; right: 0; top: calc(100% + 6px);
   }
   .horizon-group .helper-text {
-    position: absolute; left: 0; right: 0; top: calc(100% + 26px);
+    position: absolute; left: 0; right: 0; top: calc(100% + 6px);
   }
+  .horizon-group .input-error:not(:empty) ~ .helper-text { display: none; }
   label {
     font-size: 12px; font-weight: 600; color: var(--text-muted);
     text-transform: uppercase; letter-spacing: 0.6px;
@@ -341,7 +342,7 @@
 
   /* SHIMMER CARD */
   .shimmer-card {
-    flex: 1 1 320px; max-width: 520px; min-height: 172px;
+    grid-column: 1 / -1; min-height: 120px;
     border-radius: 14px; overflow: hidden; position: relative;
     background: var(--surface); border: 1px solid var(--border);
   }
@@ -871,9 +872,10 @@ function renderChart(rows) {
 
 // ── RENDER TABLE ───────────────────────────────────────────────────────────
 function getMilestoneStep(horizon) {
-  if (horizon <= 10) return 1;
-  if (horizon <= 50) return 5;
-  return 10;
+  if (horizon <= 5)  return 1;
+  if (horizon <= 30) return 5;
+  if (horizon <= 60) return 10;
+  return 20;
 }
 
 function setTableMode(mode) {
