@@ -205,20 +205,18 @@
     margin-bottom: 14px;
   }
   .cards-row {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
     gap: 14px;
     margin-bottom: 24px;
   }
-  .summary-card-single {
-    flex: 1 1 320px;
-    max-width: 520px;
-  }
+  @media (max-width: 900px) { .cards-row { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 480px) { .cards-row { grid-template-columns: 1fr 1fr; } }
   .summary-card {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 14px;
-    padding: 18px 16px;
+    padding: 20px 18px;
     transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
     animation: fadeUp 0.4s ease both;
     position: relative;
@@ -230,12 +228,13 @@
     border-radius: 14px 14px 0 0;
   }
   .summary-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); border-color: var(--accent-mid); }
-  .card-year { font-size: 11px; font-weight: 700; color: var(--accent); letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 12px; }
-  .card-corpus {
+  .metric-label { font-size: 11px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 10px; }
+  .metric-value {
     font-family: 'SF Mono', 'Fira Code', monospace;
-    font-size: 22px; font-weight: 800; color: var(--text);
-    margin-bottom: 10px; line-height: 1.1;
+    font-size: 22px; font-weight: 800; color: var(--text); line-height: 1.1;
   }
+  .metric-value.gains { color: var(--accent); }
+  .metric-sub { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
   .card-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
   .card-label { font-size: 11px; color: var(--text-muted); }
   .card-val { font-size: 11px; font-weight: 600; font-family: monospace; }
@@ -750,32 +749,37 @@ function renderCards(inputs) {
   const container = document.getElementById('cardsRow');
   container.innerHTML = '';
 
-  const card = document.createElement('div');
-  card.className = 'summary-card summary-card-single';
-  card.innerHTML = `
-    <div class="card-year">After ${horizon} Year${horizon > 1 ? 's' : ''}</div>
-    <div class="card-corpus">₹0</div>
-    <div class="card-row" style="margin-top:10px;">
-      <span class="card-label">Total Invested</span>
-      <span class="card-val">${inr(invested, true)}</span>
-    </div>
-    <div class="card-row">
-      <span class="card-label">Total Gains</span>
-      <span class="card-val gain-positive">${inr(gain, true)} <span style="opacity:.7">(+${gainPct}%)</span></span>
-    </div>
-    <div class="card-row">
-      <span class="card-label">Monthly SIP Equiv.</span>
-      <span class="card-val">${inr(monthly, true)}/mo</span>
-    </div>
-    <div style="margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-      <div class="card-multiplier">${mult}× wealth</div>
-      <div class="card-multiplier" style="background:rgba(99,102,241,0.12);color:#818CF8;border-color:rgba(99,102,241,0.3);">
-        ${horizon}Y horizon
-      </div>
-    </div>
-  `;
-  container.appendChild(card);
-  animateCount(card.querySelector('.card-corpus'), corpus, 300, v => inr(v, true));
+  function makeMetricCard(label, valueHTML, subHTML, delay, isAnimated) {
+    const card = document.createElement('div');
+    card.className = 'summary-card';
+    card.style.animationDelay = delay + 'ms';
+    card.innerHTML = `
+      <div class="metric-label">${label}</div>
+      <div class="metric-value${isAnimated ? '' : ''}">${valueHTML}</div>
+      ${subHTML ? `<div class="metric-sub">${subHTML}</div>` : ''}
+    `;
+    container.appendChild(card);
+    return card;
+  }
+
+  // Card 1: Total Corpus
+  const c1 = makeMetricCard(
+    `After ${horizon} Year${horizon > 1 ? 's' : ''}`,
+    '₹0',
+    `<span class="card-multiplier">${mult}× wealth</span>&nbsp;<span class="card-multiplier" style="background:rgba(99,102,241,0.12);color:#818CF8;border-color:rgba(99,102,241,0.3);">${horizon}Y horizon</span>`,
+    0
+  );
+  animateCount(c1.querySelector('.metric-value'), corpus, 300, v => inr(v, true));
+
+  // Card 2: Total Invested
+  makeMetricCard('Total Invested', inr(invested, true), 'Principal contributed', 60);
+
+  // Card 3: Total Gains
+  const c3 = makeMetricCard('Total Gains', inr(gain, true), `+${gainPct}% returns on investment`, 120);
+  c3.querySelector('.metric-value').classList.add('gains');
+
+  // Card 4: Monthly SIP Equiv.
+  makeMetricCard('Monthly SIP Equiv.', inr(monthly, true) + '/mo', 'Equivalent monthly SIP amount', 180);
 }
 
 // ── RENDER CHART ───────────────────────────────────────────────────────────
