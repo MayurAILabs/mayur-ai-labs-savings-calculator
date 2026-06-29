@@ -105,9 +105,17 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 20px;
-    align-items: start;
+    align-items: end;
+    padding-bottom: 44px;
   }
   .input-group { display: flex; flex-direction: column; gap: 8px; }
+  .horizon-group { position: relative; }
+  .horizon-group .input-error {
+    position: absolute; left: 0; right: 0; top: calc(100% + 6px);
+  }
+  .horizon-group .helper-text {
+    position: absolute; left: 0; right: 0; top: calc(100% + 26px);
+  }
   label {
     font-size: 12px; font-weight: 600; color: var(--text-muted);
     text-transform: uppercase; letter-spacing: 0.6px;
@@ -464,7 +472,7 @@
         </select>
       </div>
 
-      <div class="input-group">
+      <div class="input-group horizon-group">
         <label for="horizonYears">Investment Horizon (Years)</label>
         <input type="number" id="horizonYears" value="20" min="1" max="100" step="1"
                placeholder="Enter years (e.g. 15)">
