@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mayur AI Labs – Daily Savings Calculator</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  :root {
+    --bg: #0F172A;
+    --surface: #1E293B;
+    --card: #334155;
+    --card-hover: #3D5068;
+    --accent: #10B981;
+    --accent-dim: rgba(16,185,129,0.15);
+    --accent-mid: rgba(16,185,129,0.4);
+    --text: #F8FAFC;
+    --text-muted: #94A3B8;
+    --border: rgba(148,163,184,0.15);
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+    --milestone: rgba(16,185,129,0.08);
+  }
+  [data-theme="light"] {
+    --bg: #F1F5F9;
+    --surface: #FFFFFF;
+    --card: #E2E8F0;
+    --card-hover: #CBD5E1;
+    --text: #0F172A;
+    --text-muted: #475569;
+    --border: rgba(15,23,42,0.12);
+    --shadow: 0 4px 24px rgba(0,0,0,0.12);
+    --milestone: rgba(16,185,129,0.1);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .brand-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--accent), #059669);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 900; color: white;
+  }
+  .brand-name {
+    font-size: 17px; font-weight: 700; letter-spacing: -0.3px;
+  }
+  .brand-sub { font-size: 12px; color: var(--text-muted); font-weight: 400; }
+  .header-actions { display: flex; gap: 10px; align-items: center; }
+  .btn {
+    padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;
+    font-size: 13px; font-weight: 600; transition: all 0.2s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-ghost {
+    background: var(--card); color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { background: var(--card-hover); }
+  .btn-accent { background: var(--accent); color: white; }
+  .btn-accent:hover { background: #059669; transform: translateY(-1px); }
+
+  /* MAIN LAYOUT */
+  main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px 20px 40px;
+  }
+
+  /* INPUTS PANEL */
+  .inputs-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+  .inputs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    align-items: end;
+  }
+  .input-group { display: flex; flex-direction: column; gap: 8px; }
+  label {
+    font-size: 12px; font-weight: 600; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.6px;
+  }
+  input[type="number"], select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 15px;
+    font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+    font-weight: 600;
+    padding: 10px 14px;
+    width: 100%;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+  input[type="number"]:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
+  }
+  select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394A3B8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+  .slider-group { display: flex; flex-direction: column; gap: 8px; }
+  .slider-header { display: flex; justify-content: space-between; align-items: center; }
+  .slider-val {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 15px; font-weight: 700; color: var(--accent);
+  }
+  input[type="range"] {
+    -webkit-appearance: none; width: 100%; height: 6px;
+    background: var(--card); border-radius: 3px; outline: none; cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 20px; height: 20px;
+    border-radius: 50%; background: var(--accent);
+    border: 3px solid var(--bg); cursor: pointer;
+    box-shadow: 0 0 0 2px var(--accent-mid);
+    transition: transform 0.15s;
+  }
+  input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+  /* HORIZONS */
+  .horizon-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+  .pill {
+    display: flex; align-items: center; gap: 6px;
+    padding: 7px 14px; border-radius: 100px;
+    border: 1.5px solid var(--border);
+    background: var(--bg); cursor: pointer;
+    font-size: 13px; font-weight: 600;
+    transition: all 0.18s; user-select: none;
+  }
+  .pill input[type="checkbox"] { display: none; }
+  .pill.checked { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+  .pill:hover { border-color: var(--accent); }
+  .pill-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); display: none; }
+  .pill.checked .pill-dot { display: block; }
+
+  /* DOB optional */
+  .optional-row {
+    display: flex; align-items: center; gap: 12px;
+    margin-top: 16px; padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .optional-row label { text-transform: none; font-size: 13px; color: var(--text-muted); }
+  .optional-row input[type="date"] {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text); font-size: 13px;
+    padding: 7px 12px; outline: none;
+    color-scheme: dark;
+  }
+  [data-theme="light"] .optional-row input[type="date"] { color-scheme: light; }
+  .optional-row input[type="date"]:focus { border-color: var(--accent); }
+
+  /* SUMMARY CARDS */
+  .section-title {
+    font-size: 13px; font-weight: 700; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.8px;
+    margin-bottom: 14px;
+  }
+  .cards-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .summary-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 16px;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    animation: fadeUp 0.4s ease both;
+    position: relative;
+    overflow: hidden;
+  }
+  .summary-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--accent), #059669);
+    border-radius: 14px 14px 0 0;
+  }
+  .summary-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); border-color: var(--accent-mid); }
+  .card-year { font-size: 11px; font-weight: 700; color: var(--accent); letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 12px; }
+  .card-corpus {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 22px; font-weight: 800; color: var(--text);
+    margin-bottom: 10px; line-height: 1.1;
+  }
+  .card-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
+  .card-label { font-size: 11px; color: var(--text-muted); }
+  .card-val { font-size: 11px; font-weight: 600; font-family: monospace; }
+  .card-multiplier {
+    margin-top: 10px; display: inline-block;
+    background: var(--accent-dim); color: var(--accent);
+    font-size: 12px; font-weight: 700; padding: 3px 10px;
+    border-radius: 100px; border: 1px solid var(--accent-mid);
+  }
+
+  /* CHART */
+  .chart-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+  .chart-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+  }
+  .chart-container { position: relative; width: 100%; height: 340px; }
+
+  /* TABLE */
+  .table-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+  .table-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 16px; flex-wrap: wrap; gap: 10px;
+  }
+  .toggle-group { display: flex; gap: 8px; }
+  .toggle-btn {
+    padding: 7px 14px; border-radius: 8px; border: 1.5px solid var(--border);
+    background: transparent; color: var(--text-muted); font-size: 12px;
+    font-weight: 600; cursor: pointer; transition: all 0.18s;
+  }
+  .toggle-btn.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+  .table-wrap { overflow-x: auto; max-height: 440px; overflow-y: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th {
+    position: sticky; top: 0; z-index: 2;
+    background: var(--bg); padding: 11px 14px;
+    text-align: right; font-size: 11px; font-weight: 700;
+    color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+  }
+  thead th:first-child { text-align: center; }
+  tbody tr { transition: background 0.15s; }
+  tbody tr:hover { background: var(--accent-dim); }
+  tbody td {
+    padding: 10px 14px; text-align: right;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 12px; border-bottom: 1px solid var(--border);
+  }
+  tbody td:first-child { text-align: center; font-weight: 700; }
+  .milestone-row { background: var(--milestone) !important; }
+  .milestone-row td:first-child { color: var(--accent); }
+  .gain-positive { color: #34D399; }
+
+  /* FOOTER */
+  footer {
+    text-align: center; padding: 24px 20px;
+    border-top: 1px solid var(--border);
+    color: var(--text-muted); font-size: 12px; line-height: 1.8;
+  }
+  footer strong { color: var(--accent); }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; }
+    50%      { opacity: 0.6; }
+  }
+  .loading { animation: pulse 1s infinite; }
+
+  /* PRINT */
+  @media print {
+    header { position: static; }
+    .header-actions, .toggle-group, .optional-row { display: none; }
+    body { background: white; color: black; }
+    .summary-card, .chart-section, .table-section, .inputs-panel { break-inside: avoid; }
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    header { padding: 0 14px; }
+    .brand-name { font-size: 14px; }
+    main { padding: 14px 12px 32px; }
+    .inputs-grid { grid-template-columns: 1fr; }
+    .cards-row { grid-template-columns: repeat(2, 1fr); }
+    .chart-container { height: 240px; }
+    .btn span { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-icon">M</div>
+    <div>
+      <div class="brand-name">Mayur AI Labs</div>
+      <div class="brand-sub">Daily Savings Calculator</div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-ghost" onclick="toggleTheme()" id="themeBtn">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      <span id="themeLabel">Light</span>
+    </button>
+    <button class="btn btn-accent" onclick="window.print()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      <span>Export PDF</span>
+    </button>
+  </div>
+</header>
+
+<main>
+
+  <!-- INPUTS -->
+  <div class="inputs-panel">
+    <div class="inputs-grid">
+
+      <div class="input-group">
+        <label>Daily Savings (₹)</label>
+        <input type="number" id="dailySavings" value="100" min="1" max="100000" step="10">
+      </div>
+
+      <div class="input-group slider-group">
+        <label class="slider-header">
+          <span>Annual Return (%)</span>
+          <span class="slider-val" id="rateDisplay">12%</span>
+        </label>
+        <input type="range" id="rateSlider" min="1" max="30" step="0.5" value="12">
+        <input type="number" id="rateInput" value="12" min="1" max="30" step="0.5" style="margin-top:4px;">
+      </div>
+
+      <div class="input-group">
+        <label>Investment Frequency</label>
+        <select id="frequency">
+          <option value="daily">Daily (invest every day)</option>
+          <option value="weekly">Weekly (7-day batch)</option>
+          <option value="monthly" selected>Monthly (monthly SIP)</option>
+          <option value="quarterly">Quarterly</option>
+          <option value="annually">Annually</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label>Projection Horizons</label>
+        <div class="horizon-pills" id="horizonPills">
+          <label class="pill checked" data-year="5"><input type="checkbox" value="5" checked><div class="pill-dot"></div>5Y</label>
+          <label class="pill checked" data-year="10"><input type="checkbox" value="10" checked><div class="pill-dot"></div>10Y</label>
+          <label class="pill checked" data-year="15"><input type="checkbox" value="15" checked><div class="pill-dot"></div>15Y</label>
+          <label class="pill checked" data-year="20"><input type="checkbox" value="20" checked><div class="pill-dot"></div>20Y</label>
+          <label class="pill checked" data-year="25"><input type="checkbox" value="25" checked><div class="pill-dot"></div>25Y</label>
+          <label class="pill checked" data-year="30"><input type="checkbox" value="30" checked><div class="pill-dot"></div>30Y</label>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="optional-row">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <label for="dob">Date of Birth (optional – shows age column):</label>
+      <input type="date" id="dob">
+    </div>
+  </div>
+
+  <!-- SUMMARY CARDS -->
+  <div class="section-title">Projection Summary</div>
+  <div class="cards-row" id="cardsRow"></div>
+
+  <!-- CHART -->
+  <div class="chart-section">
+    <div class="chart-header">
+      <div>
+        <div class="section-title" style="margin-bottom:2px;">Compounding Growth Chart</div>
+        <div style="font-size:12px;color:var(--text-muted);">Invested principal vs corpus over time</div>
+      </div>
+      <div style="display:flex;gap:16px;font-size:12px;font-weight:600;align-items:center;">
+        <span style="display:flex;align-items:center;gap:6px;"><span style="display:inline-block;width:24px;height:3px;background:var(--accent);border-radius:2px;"></span>Total Corpus</span>
+        <span style="display:flex;align-items:center;gap:6px;"><span style="display:inline-block;width:24px;height:3px;background:#64748B;border-radius:2px;"></span>Invested</span>
+      </div>
+    </div>
+    <div class="chart-container">
+      <canvas id="growthChart"></canvas>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-section">
+    <div class="table-header">
+      <div>
+        <div class="section-title" style="margin-bottom:2px;">Year-by-Year Breakdown</div>
+        <div style="font-size:12px;color:var(--text-muted);" id="tableSubtitle"></div>
+      </div>
+      <div class="toggle-group">
+        <button class="toggle-btn active" id="btnAll" onclick="setTableMode('all')">All Years</button>
+        <button class="toggle-btn" id="btnMilestone" onclick="setTableMode('milestone')">Milestones</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table id="breakdownTable">
+        <thead id="tableHead"></thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <strong>Mayur AI Labs</strong> &copy; 2026 &nbsp;·&nbsp; Daily Savings Calculator<br>
+  <span>This calculator provides estimates based on fixed-rate compounding. Actual returns may vary based on market conditions.</span>
+</footer>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────────────────
+let chartInstance = null;
+let tableMode = 'all';
+let cachedData = null;
+
+// ── THEME TOGGLE ───────────────────────────────────────────────────────────
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('themeLabel').textContent = isDark ? 'Dark' : 'Light';
+  if (cachedData) renderChart(cachedData);
+}
+
+// ── FREQUENCY CONFIG ───────────────────────────────────────────────────────
+const FREQ = {
+  daily:     { n: 365,  factor: 1         },
+  weekly:    { n: 52,   factor: 7         },
+  monthly:   { n: 12,   factor: 365/12    },
+  quarterly: { n: 4,    factor: 365/4     },
+  annually:  { n: 1,    factor: 365       },
+};
+
+// ── CALCULATIONS ───────────────────────────────────────────────────────────
+function calcFV(pmt, r, n, t) {
+  if (r === 0) return pmt * n * t;
+  const periodic = r / n;
+  return pmt * ((Math.pow(1 + periodic, n * t) - 1) / periodic);
+}
+
+function getInputs() {
+  const daily = parseFloat(document.getElementById('dailySavings').value) || 100;
+  const rate  = parseFloat(document.getElementById('rateInput').value) / 100 || 0.12;
+  const freq  = document.getElementById('frequency').value;
+  const horizons = [...document.querySelectorAll('#horizonPills input:checked')]
+    .map(c => parseInt(c.value)).sort((a,b) => a - b);
+  const dob = document.getElementById('dob').value;
+  const dobAge = dob ? Math.floor((new Date() - new Date(dob)) / (365.25*24*3600*1000)) : null;
+  return { daily, rate, freq, horizons, dobAge };
+}
+
+function buildYearlyData(daily, rate, freq, maxYear) {
+  const { n, factor } = FREQ[freq];
+  const pmt = daily * factor;
+  const rows = [];
+  let prevCorpus = 0;
+  const periodicRate = rate / n;
+
+  for (let yr = 1; yr <= maxYear; yr++) {
+    const corpus    = calcFV(pmt, rate, n, yr);
+    const invested  = pmt * n * yr;
+    const totalGain = corpus - invested;
+    const yearlyInv = pmt * n;
+    const yearGain  = corpus - prevCorpus - yearlyInv;
+    rows.push({ yr, corpus, invested, totalGain, yearlyInv, yearGain });
+    prevCorpus = corpus;
+  }
+  return rows;
+}
+
+// ── INDIAN NUMBER FORMAT ───────────────────────────────────────────────────
+function inr(val, short = false) {
+  if (isNaN(val)) return '₹0';
+  if (short) {
+    if (val >= 1e7) return '₹' + (val/1e7).toFixed(2) + ' Cr';
+    if (val >= 1e5) return '₹' + (val/1e5).toFixed(2) + ' L';
+    return '₹' + Math.round(val).toLocaleString('en-IN');
+  }
+  return '₹' + Math.round(val).toLocaleString('en-IN');
+}
+
+// ── RENDER CARDS ───────────────────────────────────────────────────────────
+function renderCards(inputs, rows) {
+  const { daily, rate, freq, horizons } = inputs;
+  const { n, factor } = FREQ[freq];
+  const pmt = daily * factor;
+  const container = document.getElementById('cardsRow');
+  container.innerHTML = '';
+
+  if (!horizons.length) {
+    container.innerHTML = '<div style="color:var(--text-muted);font-size:14px;padding:20px;">Select at least one horizon above.</div>';
+    return;
+  }
+
+  horizons.forEach((yr, i) => {
+    const corpus   = calcFV(pmt, rate, n, yr);
+    const invested = pmt * n * yr;
+    const gain     = corpus - invested;
+    const mult     = (corpus / invested).toFixed(2);
+    const delay    = i * 60;
+
+    const card = document.createElement('div');
+    card.className = 'summary-card';
+    card.style.animationDelay = delay + 'ms';
+    card.innerHTML = `
+      <div class="card-year">${yr} Year${yr>1?'s':''}</div>
+      <div class="card-corpus">${inr(corpus, true)}</div>
+      <div class="card-row">
+        <span class="card-label">Invested</span>
+        <span class="card-val">${inr(invested, true)}</span>
+      </div>
+      <div class="card-row">
+        <span class="card-label">Gains</span>
+        <span class="card-val gain-positive">${inr(gain, true)}</span>
+      </div>
+      <div class="card-multiplier">${mult}× wealth</div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+// ── RENDER CHART ───────────────────────────────────────────────────────────
+function renderChart(rows) {
+  const isDark  = document.documentElement.getAttribute('data-theme') === 'dark';
+  const gridClr = isDark ? 'rgba(148,163,184,0.1)' : 'rgba(15,23,42,0.08)';
+  const textClr = isDark ? '#94A3B8' : '#64748B';
+
+  const labels   = rows.map(r => r.yr);
+  const corpus   = rows.map(r => Math.round(r.corpus));
+  const invested = rows.map(r => Math.round(r.invested));
+
+  const ctx = document.getElementById('growthChart').getContext('2d');
+
+  const gainGrad = ctx.createLinearGradient(0, 0, 0, 340);
+  gainGrad.addColorStop(0, 'rgba(16,185,129,0.35)');
+  gainGrad.addColorStop(1, 'rgba(16,185,129,0.02)');
+
+  if (chartInstance) chartInstance.destroy();
+
+  chartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Total Corpus',
+          data: corpus,
+          borderColor: '#10B981',
+          borderWidth: 2.5,
+          pointRadius: 0,
+          pointHoverRadius: 6,
+          pointHoverBackgroundColor: '#10B981',
+          fill: '-1',
+          backgroundColor: gainGrad,
+          tension: 0.35,
+        },
+        {
+          label: 'Amount Invested',
+          data: invested,
+          borderColor: '#64748B',
+          borderWidth: 2,
+          borderDash: [5,4],
+          pointRadius: 0,
+          pointHoverRadius: 5,
+          pointHoverBackgroundColor: '#64748B',
+          fill: 'origin',
+          backgroundColor: isDark ? 'rgba(100,116,139,0.07)' : 'rgba(100,116,139,0.1)',
+          tension: 0.1,
+        },
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 700, easing: 'easeInOutQuart' },
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: isDark ? '#1E293B' : '#FFFFFF',
+          borderColor: isDark ? 'rgba(148,163,184,0.2)' : 'rgba(15,23,42,0.1)',
+          borderWidth: 1,
+          titleColor: textClr,
+          bodyColor: isDark ? '#F8FAFC' : '#0F172A',
+          padding: 12,
+          callbacks: {
+            title: (items) => `Year ${items[0].label}`,
+            label: (item) => {
+              const yr   = parseInt(item.label);
+              const row  = rows[yr - 1];
+              if (item.datasetIndex === 0) {
+                return [
+                  ` Corpus:   ${inr(row.corpus)}`,
+                  ` Gains:    ${inr(row.totalGain)}`,
+                ];
+              }
+              return ` Invested: ${inr(row.invested)}`;
+            },
+          }
+        },
+      },
+      scales: {
+        x: {
+          grid: { color: gridClr },
+          ticks: { color: textClr, font: { size: 11 }, maxTicksLimit: 10 },
+          title: { display: true, text: 'Years', color: textClr, font: { size: 12 } },
+        },
+        y: {
+          grid: { color: gridClr },
+          ticks: {
+            color: textClr,
+            font: { size: 11 },
+            callback: (val) => {
+              if (val >= 1e7) return '₹' + (val/1e7).toFixed(1) + 'Cr';
+              if (val >= 1e5) return '₹' + (val/1e5).toFixed(1) + 'L';
+              if (val >= 1e3) return '₹' + (val/1e3).toFixed(0) + 'K';
+              return '₹' + val;
+            }
+          },
+        }
+      }
+    }
+  });
+}
+
+// ── RENDER TABLE ───────────────────────────────────────────────────────────
+function setTableMode(mode) {
+  tableMode = mode;
+  document.getElementById('btnAll').classList.toggle('active', mode === 'all');
+  document.getElementById('btnMilestone').classList.toggle('active', mode === 'milestone');
+  if (cachedData) renderTable(cachedData.rows, cachedData.inputs);
+}
+
+function renderTable(rows, inputs) {
+  const milestones = new Set([5, 10, 15, 20, 25, 30]);
+  const showDOB = inputs.dobAge !== null;
+  const maxYr = rows.length;
+  const displayRows = tableMode === 'milestone'
+    ? rows.filter(r => milestones.has(r.yr))
+    : rows;
+
+  document.getElementById('tableSubtitle').textContent =
+    `Showing ${displayRows.length} of ${maxYr} year${maxYr>1?'s':''} · Values in ₹ (Indian format)`;
+
+  const head = document.getElementById('tableHead');
+  head.innerHTML = `<tr>
+    <th>Yr</th>
+    ${showDOB ? '<th style="text-align:right">Age</th>' : ''}
+    <th>Yearly Investment</th>
+    <th>Cumulative Invested</th>
+    <th>Interest (Year)</th>
+    <th>Total Interest</th>
+    <th>Total Corpus</th>
+  </tr>`;
+
+  const body = document.getElementById('tableBody');
+  body.innerHTML = displayRows.map(r => {
+    const isMilestone = milestones.has(r.yr);
+    const age = showDOB ? inputs.dobAge + r.yr : null;
+    return `<tr class="${isMilestone ? 'milestone-row' : ''}">
+      <td>${r.yr}</td>
+      ${showDOB ? `<td>${age}</td>` : ''}
+      <td>${inr(r.yearlyInv)}</td>
+      <td>${inr(r.invested)}</td>
+      <td class="gain-positive">${inr(Math.max(0, r.yearGain))}</td>
+      <td class="gain-positive">${inr(r.totalGain)}</td>
+      <td style="font-weight:700;color:var(--text)">${inr(r.corpus)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── MAIN RECALC ────────────────────────────────────────────────────────────
+function recalculate() {
+  const inputs = getInputs();
+  const { daily, rate, freq, horizons } = inputs;
+  if (!horizons.length) {
+    document.getElementById('cardsRow').innerHTML =
+      '<div style="color:var(--text-muted);font-size:14px;padding:20px;">Select at least one horizon above.</div>';
+    return;
+  }
+
+  const maxYear = Math.max(...horizons);
+  const rows    = buildYearlyData(daily, rate, freq, maxYear);
+
+  cachedData = { rows, inputs };
+  renderCards(inputs, rows);
+  renderChart(rows);
+  renderTable(rows, inputs);
+}
+
+// ── EVENT WIRING ───────────────────────────────────────────────────────────
+document.getElementById('rateSlider').addEventListener('input', function() {
+  document.getElementById('rateInput').value = this.value;
+  document.getElementById('rateDisplay').textContent = this.value + '%';
+  recalculate();
+});
+document.getElementById('rateInput').addEventListener('input', function() {
+  const v = Math.min(30, Math.max(1, parseFloat(this.value) || 12));
+  document.getElementById('rateSlider').value = v;
+  document.getElementById('rateDisplay').textContent = v + '%';
+  recalculate();
+});
+document.getElementById('dailySavings').addEventListener('input', recalculate);
+document.getElementById('frequency').addEventListener('change', recalculate);
+document.getElementById('dob').addEventListener('change', recalculate);
+
+document.querySelectorAll('#horizonPills .pill').forEach(pill => {
+  pill.addEventListener('click', function() {
+    const cb = this.querySelector('input[type="checkbox"]');
+    cb.checked = !cb.checked;
+    this.classList.toggle('checked', cb.checked);
+    recalculate();
+  });
+  // prevent double-toggle from checkbox click bubbling
+  pill.querySelector('input').addEventListener('click', e => e.stopPropagation());
+});
+
+// ── INIT ───────────────────────────────────────────────────────────────────
+recalculate();
+</script>
+</body>
+</html>
