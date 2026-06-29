@@ -148,21 +148,30 @@
   }
   input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
 
-  /* HORIZONS */
-  .horizon-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
-  .pill {
-    display: flex; align-items: center; gap: 6px;
-    padding: 7px 14px; border-radius: 100px;
-    border: 1.5px solid var(--border);
-    background: var(--bg); cursor: pointer;
-    font-size: 13px; font-weight: 600;
-    transition: all 0.18s; user-select: none;
+  /* HORIZON INPUT HELPERS */
+  .helper-text {
+    font-size: 11px; color: var(--text-muted); margin-top: 2px; line-height: 1.4;
   }
-  .pill input[type="checkbox"] { display: none; }
-  .pill.checked { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
-  .pill:hover { border-color: var(--accent); }
-  .pill-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); display: none; }
-  .pill.checked .pill-dot { display: block; }
+  .input-error {
+    font-size: 11px; color: #F87171; font-weight: 600;
+    min-height: 16px; margin-top: 2px; line-height: 1.4;
+  }
+  input.input-invalid {
+    border-color: #EF4444 !important;
+    box-shadow: 0 0 0 3px rgba(239,68,68,0.15) !important;
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: #334155; color: var(--text);
+    border: 1px solid var(--accent-mid); border-radius: 10px;
+    padding: 11px 20px; font-size: 13px; font-weight: 600;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4); z-index: 9999;
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
+    opacity: 0; pointer-events: none; white-space: nowrap;
+  }
+  .toast.toast-show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
   /* DOB optional */
   .optional-row {
@@ -187,10 +196,14 @@
     margin-bottom: 14px;
   }
   .cards-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    display: flex;
+    flex-wrap: wrap;
     gap: 14px;
     margin-bottom: 24px;
+  }
+  .summary-card-single {
+    flex: 1 1 320px;
+    max-width: 520px;
   }
   .summary-card {
     background: var(--surface);
@@ -279,6 +292,65 @@
   .milestone-row td:first-child { color: var(--accent); }
   .gain-positive { color: #34D399; }
 
+  /* CALCULATE BUTTON */
+  .calc-btn {
+    width: 100%; min-height: 48px; margin-top: 20px;
+    background: var(--accent); color: white; border: none;
+    border-radius: 10px; cursor: pointer;
+    font-size: 13px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    transition: background 0.2s, transform 0.12s, box-shadow 0.2s;
+    box-shadow: 0 4px 16px rgba(16,185,129,0.3);
+    position: relative; overflow: hidden;
+  }
+  .calc-btn:hover:not(:disabled) {
+    background: #059669;
+    box-shadow: 0 6px 22px rgba(16,185,129,0.5);
+  }
+  .calc-btn:active:not(:disabled) { transform: scale(0.97); }
+  .calc-btn:disabled { background: #4B5563; cursor: not-allowed; box-shadow: none; }
+  .calc-btn.stale { animation: calcGlow 1.6s ease-in-out infinite; }
+  @keyframes calcGlow {
+    0%,100% { box-shadow: 0 4px 16px rgba(16,185,129,0.3); }
+    50%      { box-shadow: 0 0 28px rgba(16,185,129,0.7), 0 4px 16px rgba(16,185,129,0.4); }
+  }
+
+  /* STALE HINT */
+  .stale-hint {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    font-size: 11px; font-weight: 600; color: var(--accent);
+    margin-top: 8px; opacity: 0; transition: opacity 0.3s; min-height: 18px;
+  }
+  .stale-hint.visible { opacity: 1; }
+  .stale-dot {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+    animation: pulseDot 1.2s ease-in-out infinite;
+  }
+  @keyframes pulseDot {
+    0%,100% { transform: scale(1); opacity: 1; }
+    50%      { transform: scale(1.5); opacity: 0.5; }
+  }
+
+  /* SHIMMER CARD */
+  .shimmer-card {
+    flex: 1 1 320px; max-width: 520px; min-height: 172px;
+    border-radius: 14px; overflow: hidden; position: relative;
+    background: var(--surface); border: 1px solid var(--border);
+  }
+  .shimmer-card::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg,
+      transparent 0%, rgba(148,163,184,0.12) 40%,
+      rgba(148,163,184,0.22) 50%, rgba(148,163,184,0.12) 60%,
+      transparent 100%);
+    background-size: 600px 100%;
+    animation: shimmerSlide 1.3s infinite;
+  }
+  @keyframes shimmerSlide {
+    0%   { background-position: -600px 0; }
+    100% { background-position: 600px 0; }
+  }
+
   /* FOOTER */
   footer {
     text-align: center; padding: 24px 20px;
@@ -297,6 +369,25 @@
     50%      { opacity: 0.6; }
   }
   .loading { animation: pulse 1s infinite; }
+
+  /* DEVELOPER CARD */
+  .dev-card {
+    display: inline-flex; align-items: center; gap: 12px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 16px; margin-top: 14px;
+    text-decoration: none; transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .dev-card:hover { border-color: var(--accent-mid); box-shadow: 0 0 0 3px var(--accent-dim); }
+  .dev-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), #059669);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 800; color: white; flex-shrink: 0;
+  }
+  .dev-info { text-align: left; }
+  .dev-by { font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; }
+  .dev-name { font-size: 13px; font-weight: 700; color: var(--text); line-height: 1.3; }
+  .dev-email { font-size: 11px; color: var(--accent); font-weight: 500; }
 
   /* PRINT */
   @media print {
@@ -372,15 +463,11 @@
       </div>
 
       <div class="input-group">
-        <label>Projection Horizons</label>
-        <div class="horizon-pills" id="horizonPills">
-          <label class="pill checked" data-year="5"><input type="checkbox" value="5" checked><div class="pill-dot"></div>5Y</label>
-          <label class="pill checked" data-year="10"><input type="checkbox" value="10" checked><div class="pill-dot"></div>10Y</label>
-          <label class="pill checked" data-year="15"><input type="checkbox" value="15" checked><div class="pill-dot"></div>15Y</label>
-          <label class="pill checked" data-year="20"><input type="checkbox" value="20" checked><div class="pill-dot"></div>20Y</label>
-          <label class="pill checked" data-year="25"><input type="checkbox" value="25" checked><div class="pill-dot"></div>25Y</label>
-          <label class="pill checked" data-year="30"><input type="checkbox" value="30" checked><div class="pill-dot"></div>30Y</label>
-        </div>
+        <label for="horizonYears">Investment Horizon (Years)</label>
+        <input type="number" id="horizonYears" value="20" min="1" max="100" step="1"
+               placeholder="Enter years (e.g. 15)">
+        <div class="input-error" id="horizonError"></div>
+        <div class="helper-text">You can enter any value from 1 to 100 years</div>
       </div>
 
     </div>
@@ -390,9 +477,19 @@
       <label for="dob">Date of Birth (optional – shows age column):</label>
       <input type="date" id="dob">
     </div>
+
+    <button class="calc-btn" id="calcBtn" onclick="handleCalculate()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/><line x1="15" y1="17" x2="19" y2="17"/><line x1="17" y1="15" x2="17" y2="19"/></svg>
+      Calculate
+    </button>
+    <div class="stale-hint" id="staleHint">
+      <div class="stale-dot"></div>
+      Inputs changed — click Calculate to update
+    </div>
   </div>
 
   <!-- SUMMARY CARDS -->
+  <div id="resultsSection">
   <div class="section-title">Projection Summary</div>
   <div class="cards-row" id="cardsRow"></div>
 
@@ -431,13 +528,24 @@
         <tbody id="tableBody"></tbody>
       </table>
     </div>
-  </div>
+  </div><!-- /table-section -->
+  </div><!-- /resultsSection -->
 
 </main>
 
 <footer>
   <strong>Mayur AI Labs</strong> &copy; 2026 &nbsp;·&nbsp; Daily Savings Calculator<br>
   <span>This calculator provides estimates based on fixed-rate compounding. Actual returns may vary based on market conditions.</span>
+  <br>
+  <a class="dev-card" href="mailto:mayur.munshi1@gmail.com" title="Send email to Mayur Munshi">
+    <div class="dev-avatar">MM</div>
+    <div class="dev-info">
+      <div class="dev-by">Developed by</div>
+      <div class="dev-name">Mayur Munshi</div>
+      <div class="dev-email">mayur.munshi1@gmail.com</div>
+    </div>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-muted);flex-shrink:0"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+  </a>
 </footer>
 
 <script>
@@ -445,6 +553,7 @@
 let chartInstance = null;
 let tableMode = 'all';
 let cachedData = null;
+let isDirty = false;
 
 // ── THEME TOGGLE ───────────────────────────────────────────────────────────
 function toggleTheme() {
@@ -452,34 +561,33 @@ function toggleTheme() {
   const isDark = html.getAttribute('data-theme') === 'dark';
   html.setAttribute('data-theme', isDark ? 'light' : 'dark');
   document.getElementById('themeLabel').textContent = isDark ? 'Dark' : 'Light';
-  if (cachedData) renderChart(cachedData);
+  if (cachedData) renderChart(cachedData.rows);
 }
 
 // ── FREQUENCY CONFIG ───────────────────────────────────────────────────────
 const FREQ = {
-  daily:     { n: 365,  factor: 1         },
-  weekly:    { n: 52,   factor: 7         },
-  monthly:   { n: 12,   factor: 365/12    },
-  quarterly: { n: 4,    factor: 365/4     },
-  annually:  { n: 1,    factor: 365       },
+  daily:     { n: 365, factor: 1       },
+  weekly:    { n: 52,  factor: 7       },
+  monthly:   { n: 12,  factor: 365/12  },
+  quarterly: { n: 4,   factor: 365/4   },
+  annually:  { n: 1,   factor: 365     },
 };
 
 // ── CALCULATIONS ───────────────────────────────────────────────────────────
 function calcFV(pmt, r, n, t) {
   if (r === 0) return pmt * n * t;
-  const periodic = r / n;
-  return pmt * ((Math.pow(1 + periodic, n * t) - 1) / periodic);
+  const pr = r / n;
+  return pmt * ((Math.pow(1 + pr, n * t) - 1) / pr);
 }
 
 function getInputs() {
-  const daily = parseFloat(document.getElementById('dailySavings').value) || 100;
-  const rate  = parseFloat(document.getElementById('rateInput').value) / 100 || 0.12;
-  const freq  = document.getElementById('frequency').value;
-  const horizons = [...document.querySelectorAll('#horizonPills input:checked')]
-    .map(c => parseInt(c.value)).sort((a,b) => a - b);
-  const dob = document.getElementById('dob').value;
-  const dobAge = dob ? Math.floor((new Date() - new Date(dob)) / (365.25*24*3600*1000)) : null;
-  return { daily, rate, freq, horizons, dobAge };
+  const daily   = parseFloat(document.getElementById('dailySavings').value) || 100;
+  const rate    = parseFloat(document.getElementById('rateInput').value) / 100 || 0.12;
+  const freq    = document.getElementById('frequency').value;
+  const horizon = parseInt(document.getElementById('horizonYears').value) || 20;
+  const dob     = document.getElementById('dob').value;
+  const dobAge  = dob ? Math.floor((new Date() - new Date(dob)) / (365.25*24*3600*1000)) : null;
+  return { daily, rate, freq, horizon, dobAge };
 }
 
 function buildYearlyData(daily, rate, freq, maxYear) {
@@ -487,8 +595,6 @@ function buildYearlyData(daily, rate, freq, maxYear) {
   const pmt = daily * factor;
   const rows = [];
   let prevCorpus = 0;
-  const periodicRate = rate / n;
-
   for (let yr = 1; yr <= maxYear; yr++) {
     const corpus    = calcFV(pmt, rate, n, yr);
     const invested  = pmt * n * yr;
@@ -512,44 +618,154 @@ function inr(val, short = false) {
   return '₹' + Math.round(val).toLocaleString('en-IN');
 }
 
+// ── COUNT-UP ANIMATION ─────────────────────────────────────────────────────
+function animateCount(el, endVal, duration, formatFn) {
+  const start = performance.now();
+  function step(now) {
+    const t = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - t, 3); // ease-out cubic
+    el.textContent = formatFn(endVal * eased);
+    if (t < 1) requestAnimationFrame(step);
+    else el.textContent = formatFn(endVal);
+  }
+  requestAnimationFrame(step);
+}
+
+// ── TOAST ──────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  let toast = document.getElementById('toastEl');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'toastEl';
+    toast.className = 'toast';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.classList.add('toast-show');
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => toast.classList.remove('toast-show'), 3000);
+}
+
+// ── STALE STATE ────────────────────────────────────────────────────────────
+function markStale() {
+  if (isDirty) return;
+  isDirty = true;
+  document.getElementById('calcBtn').classList.add('stale');
+  document.getElementById('staleHint').classList.add('visible');
+}
+
+function clearStale() {
+  isDirty = false;
+  document.getElementById('calcBtn').classList.remove('stale');
+  document.getElementById('staleHint').classList.remove('visible');
+}
+
+// ── HORIZON VALIDATION ─────────────────────────────────────────────────────
+function validateHorizon(clampAndToast = false) {
+  const input = document.getElementById('horizonYears');
+  const error = document.getElementById('horizonError');
+  const raw   = input.value.trim();
+
+  if (raw === '' || isNaN(Number(raw))) {
+    error.textContent = 'Please enter a valid number of years between 1 and 100';
+    input.classList.add('input-invalid');
+    document.getElementById('calcBtn').disabled = true;
+    return false;
+  }
+
+  const val = Math.floor(Number(raw));
+
+  if (val < 1 || val > 100) {
+    if (clampAndToast) {
+      const clamped = Math.min(100, Math.max(1, val));
+      input.value = clamped;
+      showToast(`Value clamped to ${clamped} year${clamped > 1 ? 's' : ''} — valid range is 1–100`);
+      error.textContent = '';
+      input.classList.remove('input-invalid');
+      document.getElementById('calcBtn').disabled = false;
+      return true;
+    }
+    error.textContent = 'Please enter a valid number of years between 1 and 100';
+    input.classList.add('input-invalid');
+    document.getElementById('calcBtn').disabled = true;
+    return false;
+  }
+
+  if (input.value !== String(val)) input.value = val;
+  error.textContent = '';
+  input.classList.remove('input-invalid');
+  document.getElementById('calcBtn').disabled = false;
+  return true;
+}
+
+// ── VALIDATE ALL INPUTS ────────────────────────────────────────────────────
+function validateAll() {
+  let valid = true;
+
+  const daily = parseFloat(document.getElementById('dailySavings').value);
+  const dailyEl = document.getElementById('dailySavings');
+  if (isNaN(daily) || daily < 1) {
+    dailyEl.classList.add('input-invalid');
+    valid = false;
+  } else {
+    dailyEl.classList.remove('input-invalid');
+  }
+
+  const rate = parseFloat(document.getElementById('rateInput').value);
+  const rateEl = document.getElementById('rateInput');
+  if (isNaN(rate) || rate < 1 || rate > 30) {
+    rateEl.classList.add('input-invalid');
+    valid = false;
+  } else {
+    rateEl.classList.remove('input-invalid');
+  }
+
+  if (!validateHorizon(true)) valid = false;
+
+  return valid;
+}
+
 // ── RENDER CARDS ───────────────────────────────────────────────────────────
-function renderCards(inputs, rows) {
-  const { daily, rate, freq, horizons } = inputs;
+function renderCards(inputs) {
+  const { daily, rate, freq, horizon } = inputs;
   const { n, factor } = FREQ[freq];
-  const pmt = daily * factor;
+  const pmt      = daily * factor;
+  const corpus   = calcFV(pmt, rate, n, horizon);
+  const invested = pmt * n * horizon;
+  const gain     = corpus - invested;
+  const mult     = (corpus / invested).toFixed(2);
+  const monthly  = daily * (365 / 12);
+  const gainPct  = ((gain / invested) * 100).toFixed(1);
+
   const container = document.getElementById('cardsRow');
   container.innerHTML = '';
 
-  if (!horizons.length) {
-    container.innerHTML = '<div style="color:var(--text-muted);font-size:14px;padding:20px;">Select at least one horizon above.</div>';
-    return;
-  }
-
-  horizons.forEach((yr, i) => {
-    const corpus   = calcFV(pmt, rate, n, yr);
-    const invested = pmt * n * yr;
-    const gain     = corpus - invested;
-    const mult     = (corpus / invested).toFixed(2);
-    const delay    = i * 60;
-
-    const card = document.createElement('div');
-    card.className = 'summary-card';
-    card.style.animationDelay = delay + 'ms';
-    card.innerHTML = `
-      <div class="card-year">${yr} Year${yr>1?'s':''}</div>
-      <div class="card-corpus">${inr(corpus, true)}</div>
-      <div class="card-row">
-        <span class="card-label">Invested</span>
-        <span class="card-val">${inr(invested, true)}</span>
-      </div>
-      <div class="card-row">
-        <span class="card-label">Gains</span>
-        <span class="card-val gain-positive">${inr(gain, true)}</span>
-      </div>
+  const card = document.createElement('div');
+  card.className = 'summary-card summary-card-single';
+  card.innerHTML = `
+    <div class="card-year">After ${horizon} Year${horizon > 1 ? 's' : ''}</div>
+    <div class="card-corpus">₹0</div>
+    <div class="card-row" style="margin-top:10px;">
+      <span class="card-label">Total Invested</span>
+      <span class="card-val">${inr(invested, true)}</span>
+    </div>
+    <div class="card-row">
+      <span class="card-label">Total Gains</span>
+      <span class="card-val gain-positive">${inr(gain, true)} <span style="opacity:.7">(+${gainPct}%)</span></span>
+    </div>
+    <div class="card-row">
+      <span class="card-label">Monthly SIP Equiv.</span>
+      <span class="card-val">${inr(monthly, true)}/mo</span>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
       <div class="card-multiplier">${mult}× wealth</div>
-    `;
-    container.appendChild(card);
-  });
+      <div class="card-multiplier" style="background:rgba(99,102,241,0.12);color:#818CF8;border-color:rgba(99,102,241,0.3);">
+        ${horizon}Y horizon
+      </div>
+    </div>
+  `;
+  container.appendChild(card);
+  animateCount(card.querySelector('.card-corpus'), corpus, 300, v => inr(v, true));
 }
 
 // ── RENDER CHART ───────────────────────────────────────────────────────────
@@ -563,7 +779,6 @@ function renderChart(rows) {
   const invested = rows.map(r => Math.round(r.invested));
 
   const ctx = document.getElementById('growthChart').getContext('2d');
-
   const gainGrad = ctx.createLinearGradient(0, 0, 0, 340);
   gainGrad.addColorStop(0, 'rgba(16,185,129,0.35)');
   gainGrad.addColorStop(1, 'rgba(16,185,129,0.02)');
@@ -578,23 +793,17 @@ function renderChart(rows) {
         {
           label: 'Total Corpus',
           data: corpus,
-          borderColor: '#10B981',
-          borderWidth: 2.5,
-          pointRadius: 0,
-          pointHoverRadius: 6,
+          borderColor: '#10B981', borderWidth: 2.5,
+          pointRadius: 0, pointHoverRadius: 6,
           pointHoverBackgroundColor: '#10B981',
-          fill: '-1',
-          backgroundColor: gainGrad,
-          tension: 0.35,
+          fill: '-1', backgroundColor: gainGrad, tension: 0.35,
         },
         {
           label: 'Amount Invested',
           data: invested,
-          borderColor: '#64748B',
-          borderWidth: 2,
+          borderColor: '#64748B', borderWidth: 2,
           borderDash: [5,4],
-          pointRadius: 0,
-          pointHoverRadius: 5,
+          pointRadius: 0, pointHoverRadius: 5,
           pointHoverBackgroundColor: '#64748B',
           fill: 'origin',
           backgroundColor: isDark ? 'rgba(100,116,139,0.07)' : 'rgba(100,116,139,0.1)',
@@ -603,8 +812,7 @@ function renderChart(rows) {
       ]
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
+      responsive: true, maintainAspectRatio: false,
       animation: { duration: 700, easing: 'easeInOutQuart' },
       interaction: { mode: 'index', intersect: false },
       plugins: {
@@ -612,21 +820,13 @@ function renderChart(rows) {
         tooltip: {
           backgroundColor: isDark ? '#1E293B' : '#FFFFFF',
           borderColor: isDark ? 'rgba(148,163,184,0.2)' : 'rgba(15,23,42,0.1)',
-          borderWidth: 1,
-          titleColor: textClr,
-          bodyColor: isDark ? '#F8FAFC' : '#0F172A',
-          padding: 12,
+          borderWidth: 1, titleColor: textClr,
+          bodyColor: isDark ? '#F8FAFC' : '#0F172A', padding: 12,
           callbacks: {
-            title: (items) => `Year ${items[0].label}`,
-            label: (item) => {
-              const yr   = parseInt(item.label);
-              const row  = rows[yr - 1];
-              if (item.datasetIndex === 0) {
-                return [
-                  ` Corpus:   ${inr(row.corpus)}`,
-                  ` Gains:    ${inr(row.totalGain)}`,
-                ];
-              }
+            title: items => `Year ${items[0].label}`,
+            label: item => {
+              const row = rows[parseInt(item.label) - 1];
+              if (item.datasetIndex === 0) return [` Corpus:   ${inr(row.corpus)}`, ` Gains:    ${inr(row.totalGain)}`];
               return ` Invested: ${inr(row.invested)}`;
             },
           }
@@ -641,9 +841,8 @@ function renderChart(rows) {
         y: {
           grid: { color: gridClr },
           ticks: {
-            color: textClr,
-            font: { size: 11 },
-            callback: (val) => {
+            color: textClr, font: { size: 11 },
+            callback: val => {
               if (val >= 1e7) return '₹' + (val/1e7).toFixed(1) + 'Cr';
               if (val >= 1e5) return '₹' + (val/1e5).toFixed(1) + 'L';
               if (val >= 1e3) return '₹' + (val/1e3).toFixed(0) + 'K';
@@ -657,6 +856,12 @@ function renderChart(rows) {
 }
 
 // ── RENDER TABLE ───────────────────────────────────────────────────────────
+function getMilestoneStep(horizon) {
+  if (horizon <= 10) return 1;
+  if (horizon <= 50) return 5;
+  return 10;
+}
+
 function setTableMode(mode) {
   tableMode = mode;
   document.getElementById('btnAll').classList.toggle('active', mode === 'all');
@@ -665,32 +870,27 @@ function setTableMode(mode) {
 }
 
 function renderTable(rows, inputs) {
-  const milestones = new Set([5, 10, 15, 20, 25, 30]);
+  const { horizon } = inputs;
+  const step = getMilestoneStep(horizon);
+  const isMilestone = yr => yr % step === 0 || yr === horizon;
   const showDOB = inputs.dobAge !== null;
   const maxYr = rows.length;
-  const displayRows = tableMode === 'milestone'
-    ? rows.filter(r => milestones.has(r.yr))
-    : rows;
+  const displayRows = tableMode === 'milestone' ? rows.filter(r => isMilestone(r.yr)) : rows;
 
+  const stepLabel = step === 1 ? 'every year' : `every ${step} years`;
   document.getElementById('tableSubtitle').textContent =
-    `Showing ${displayRows.length} of ${maxYr} year${maxYr>1?'s':''} · Values in ₹ (Indian format)`;
+    `Showing ${displayRows.length} of ${maxYr} year${maxYr > 1 ? 's' : ''} · Milestones ${stepLabel} · Values in ₹ (Indian format)`;
 
-  const head = document.getElementById('tableHead');
-  head.innerHTML = `<tr>
+  document.getElementById('tableHead').innerHTML = `<tr>
     <th>Yr</th>
     ${showDOB ? '<th style="text-align:right">Age</th>' : ''}
-    <th>Yearly Investment</th>
-    <th>Cumulative Invested</th>
-    <th>Interest (Year)</th>
-    <th>Total Interest</th>
-    <th>Total Corpus</th>
+    <th>Yearly Investment</th><th>Cumulative Invested</th>
+    <th>Interest (Year)</th><th>Total Interest</th><th>Total Corpus</th>
   </tr>`;
 
-  const body = document.getElementById('tableBody');
-  body.innerHTML = displayRows.map(r => {
-    const isMilestone = milestones.has(r.yr);
+  document.getElementById('tableBody').innerHTML = displayRows.map(r => {
     const age = showDOB ? inputs.dobAge + r.yr : null;
-    return `<tr class="${isMilestone ? 'milestone-row' : ''}">
+    return `<tr class="${isMilestone(r.yr) ? 'milestone-row' : ''}">
       <td>${r.yr}</td>
       ${showDOB ? `<td>${age}</td>` : ''}
       <td>${inr(r.yearlyInv)}</td>
@@ -702,53 +902,69 @@ function renderTable(rows, inputs) {
   }).join('');
 }
 
-// ── MAIN RECALC ────────────────────────────────────────────────────────────
+// ── RECALCULATE (core, no shimmer) ─────────────────────────────────────────
 function recalculate() {
   const inputs = getInputs();
-  const { daily, rate, freq, horizons } = inputs;
-  if (!horizons.length) {
-    document.getElementById('cardsRow').innerHTML =
-      '<div style="color:var(--text-muted);font-size:14px;padding:20px;">Select at least one horizon above.</div>';
-    return;
-  }
-
-  const maxYear = Math.max(...horizons);
-  const rows    = buildYearlyData(daily, rate, freq, maxYear);
-
-  cachedData = { rows, inputs };
-  renderCards(inputs, rows);
+  const rows   = buildYearlyData(inputs.daily, inputs.rate, inputs.freq, inputs.horizon);
+  cachedData   = { rows, inputs };
+  renderCards(inputs);
   renderChart(rows);
   renderTable(rows, inputs);
 }
 
+// ── HANDLE CALCULATE BUTTON ────────────────────────────────────────────────
+function handleCalculate() {
+  if (!validateAll()) return;
+
+  clearStale();
+
+  // Shimmer on card area for 150ms then render
+  document.getElementById('cardsRow').innerHTML = '<div class="shimmer-card"></div>';
+
+  setTimeout(() => {
+    recalculate();
+
+    // Smooth scroll to results on narrow screens
+    if (window.innerWidth <= 900) {
+      document.getElementById('resultsSection')
+        .scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, 150);
+}
+
 // ── EVENT WIRING ───────────────────────────────────────────────────────────
+// Rate slider ↔ number input sync (no recalc — just keep them in sync)
 document.getElementById('rateSlider').addEventListener('input', function() {
   document.getElementById('rateInput').value = this.value;
   document.getElementById('rateDisplay').textContent = this.value + '%';
-  recalculate();
+  markStale();
 });
 document.getElementById('rateInput').addEventListener('input', function() {
   const v = Math.min(30, Math.max(1, parseFloat(this.value) || 12));
   document.getElementById('rateSlider').value = v;
   document.getElementById('rateDisplay').textContent = v + '%';
-  recalculate();
+  markStale();
 });
-document.getElementById('dailySavings').addEventListener('input', recalculate);
-document.getElementById('frequency').addEventListener('change', recalculate);
-document.getElementById('dob').addEventListener('change', recalculate);
 
-document.querySelectorAll('#horizonPills .pill').forEach(pill => {
-  pill.addEventListener('click', function() {
-    const cb = this.querySelector('input[type="checkbox"]');
-    cb.checked = !cb.checked;
-    this.classList.toggle('checked', cb.checked);
-    recalculate();
+// All other inputs → mark stale only
+document.getElementById('dailySavings').addEventListener('input', markStale);
+document.getElementById('frequency').addEventListener('change', markStale);
+document.getElementById('dob').addEventListener('change', markStale);
+
+// Horizon → live validation feedback + mark stale
+document.getElementById('horizonYears').addEventListener('input', function() {
+  validateHorizon(false);
+  markStale();
+});
+
+// Enter key on any input triggers Calculate
+['dailySavings','rateInput','horizonYears'].forEach(id => {
+  document.getElementById(id).addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); handleCalculate(); }
   });
-  // prevent double-toggle from checkbox click bubbling
-  pill.querySelector('input').addEventListener('click', e => e.stopPropagation());
 });
 
-// ── INIT ───────────────────────────────────────────────────────────────────
+// ── INIT — calculate once on load, no stale state ─────────────────────────
 recalculate();
 </script>
 </body>
