@@ -468,11 +468,13 @@
         <label for="horizonYears">Investment Horizon (Years)</label>
         <input type="number" id="horizonYears" value="20" min="1" max="100" step="1"
                placeholder="Enter years (e.g. 15)">
-        <div class="input-error" id="horizonError"></div>
-        <div class="helper-text">You can enter any value from 1 to 100 years</div>
       </div>
 
     </div>
+
+    <!-- horizon validation feedback sits outside the grid so it doesn't affect row height -->
+    <div class="input-error" id="horizonError" style="margin-top:6px;"></div>
+    <div class="helper-text" style="margin-top:3px;">You can enter any value from 1 to 100 years</div>
 
     <div class="optional-row">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
