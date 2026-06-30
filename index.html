@@ -118,7 +118,7 @@
   }
   .horizon-group .input-error:not(:empty) ~ .helper-text { display: none; }
   label {
-    font-size: 12px; font-weight: 600; color: var(--text-muted);
+    font-size: 14px; font-weight: 600; color: var(--text-muted);
     text-transform: uppercase; letter-spacing: 0.6px;
   }
   input[type="number"], select {
@@ -230,13 +230,13 @@
     border-radius: 14px 14px 0 0;
   }
   .summary-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); border-color: var(--accent-mid); }
-  .metric-label { font-size: 11px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 10px; }
+  .metric-label { font-size: 13px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 10px; }
   .metric-value {
     font-family: 'SF Mono', 'Fira Code', monospace;
     font-size: 22px; font-weight: 800; color: var(--text); line-height: 1.1;
   }
   .metric-value.gains { color: var(--accent); }
-  .metric-sub { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
+  .metric-sub { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
   .card-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
   .card-label { font-size: 11px; color: var(--text-muted); }
   .card-val { font-size: 11px; font-weight: 600; font-family: monospace; }
@@ -454,8 +454,10 @@
       </div>
 
       <div class="input-group slider-group">
-        <label>Annual Return (%)</label>
-        <span class="slider-val" id="rateDisplay">12%</span>
+        <div style="display:flex;justify-content:space-between;align-items:center;width:100%;">
+          <label>Annual Return (%)</label>
+          <span class="slider-val" id="rateDisplay">12%</span>
+        </div>
         <input type="range" id="rateSlider" min="1" max="30" step="0.5" value="12" style="width:100%;">
         <input type="number" id="rateInput" value="12" min="1" max="30" step="0.5" style="margin-top:4px;">
       </div>
@@ -546,12 +548,12 @@
   <strong>Mayur AI Labs</strong> &copy; 2026 &nbsp;·&nbsp; Daily Savings Calculator<br>
   <span>This calculator provides estimates based on fixed-rate compounding. Actual returns may vary based on market conditions.</span>
   <br>
-  <a class="dev-card" href="mailto:mayur.munshi1@gmail.com" title="Send email to Mayur Munshi">
+  <a class="dev-card" href="mailto:contact@mayurailabs.co.in" title="Send email to Mayur Munshi">
     <div class="dev-avatar">MM</div>
     <div class="dev-info">
       <div class="dev-by">Developed by</div>
       <div class="dev-name">Mayur Munshi</div>
-      <div class="dev-email">mayur.munshi1@gmail.com</div>
+      <div class="dev-email">contact@mayurailabs.co.in</div>
     </div>
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-muted);flex-shrink:0"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
   </a>
